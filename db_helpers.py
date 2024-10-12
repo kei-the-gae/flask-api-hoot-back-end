@@ -25,17 +25,17 @@ def consolidate_comments_in_hoots(hoots_with_comments):
             })
         break
 
-      if not hoot_exists:
-        hoot['comments'] = []
-        if hoot['comment_id'] is not None:
-          hoot['comments'].append(
-              {'comment_text': hoot['comment_text'],
-               'comment_id': hoot['comment_id'],
-               'comment_author_username': hoot['comment_author_username']
-              })
-        del hoot['comment_id']
-        del hoot['comment_text']
-        del hoot['comment_author_username']
-        consolidated_hoots.append(hoot)
-
+    if not hoot_exists:
+      hoot['comments'] = []
+      if hoot['comment_id'] is not None:
+        hoot['comments'].append(
+            {'comment_text': hoot['comment_text'],
+              'comment_id': hoot['comment_id'],
+              'comment_author_username': hoot['comment_author_username']
+            })
+      del hoot['comment_id']
+      del hoot['comment_text']
+      del hoot['comment_author_username']
+      consolidated_hoots.append(hoot)
+  print(consolidated_hoots)
   return consolidated_hoots
