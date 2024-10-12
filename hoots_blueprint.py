@@ -46,3 +46,27 @@ def create_hoot():
         return jsonify({'hoot': created_hoot}), 201
     except Exception as err:
         return jsonify({'error': str(err)}), 500
+
+@hoots_blueprint.route('/hoots/<hoot_id>', methods=['GET'])
+def show_hoot(hoot_id):
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('''
+                       SELECT h.id, h.author AS hoot_author_id, h.title, h.text, h.category, u_hoot.username AS author_username, c.id AS comment_id, c.text AS comment_text, u_comment.username AS comment_author_username
+                       FROM hoots h
+                       INNER JOIN users u_hoot ON h.author = u_hoot.id
+                       LEFT JOIN comments c ON h.id = c.hoot
+                       LEFT JOIN users u_comment ON c.author = u_comment.id
+                       WHERE h.id = %s;''',
+                       (hoot_id,))
+        unprocessed_hoot = cursor.fetchall()
+        if unprocessed_hoot is not None:
+            processed_hoot = consolidate_comments_in_hoots(unprocessed_hoot)[0]
+            connection.close()
+            return jsonify({'hoot': processed_hoot}), 200
+        else:
+            connection.close()
+            return jsonify({'error': 'Hoot not found.'}), 404
+    except Exception as err:
+        return jsonify({'error': str(err)}), 500
